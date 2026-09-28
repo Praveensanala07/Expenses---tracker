@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expense Tracker</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:720px;margin:30px auto;padding:0 16px;color:#222}
+  h1{color:#1f3864}
+  form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  input,select,button{padding:9px;font-size:14px;box-sizing:border-box}
+  button{background:#1f3864;color:#fff;border:0;border-radius:4px;cursor:pointer;grid-column:span 2}
+  .del{background:#c0392b;grid-column:auto;padding:4px 10px}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}
+  .bar-row{display:flex;align-items:center;margin:5px 0;font-size:14px}
+  .bar-label{width:110px}
+  .bar{background:#1f3864;height:16px;border-radius:3px}
+  .bar-value{margin-left:8px}
+  #error{color:#c0392b;margin-top:6px}
+  @media(max-width:500px){form{grid-template-columns:1fr}button{grid-column:auto}}
+</style>
+</head>
+<body>
+<h1>Expense Tracker</h1>
+
+<form id="form">
+  <input id="title" placeholder="What did you spend on?" required>
+  <input id="amount" type="number" step="0.01" placeholder="Amount (Rs)" required>
+  <select id="category">
+    <option>Food</option><option>Travel</option><option>Shopping</option>
+    <option>Bills</option><option>Study</option><option>Other</option>
+  </select>
+  <input id="date" type="date" required>
+  <button type="submit">Add expense</button>
+</form>
+<div id="error"></div>
+
+<h2>Summary</h2>
+<p id="total"></p>
+<div id="bars"></div>
+
+<h2>All expenses</h2>
+<table>
+  <thead><tr><th>Date</th><th>Title</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+  <tbody id="list"></tbody>
+</table>
+
+<script>
+// Small helper so text from users cannot inject HTML
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+document.getElementById('date').valueAsDate = new Date();
+
+async function load() {
+  // 1. Ask the API for all expenses and show them in the table
+  const expenses = await (await fetch('/api/expenses')).json();
+  document.getElementById('list').innerHTML = expenses.map(e =>
+    `<tr><td>${esc(e.date)}</td><td>${esc(e.title)}</td><td>${esc(e.category)}</td>
+     <td>Rs ${e.amount.toFixed(2)}</td>
+     <td><button class="del" onclick="removeExpense(${e.id})">Delete</button></td></tr>`).join('');
+
+  // 2. Ask the API for the Pandas summary and draw simple bars
+  const s = await (await fetch('/api/summary')).json();
+  document.getElementById('total').textContent = s.top_category
+    ? `Total spent: Rs ${s.total}  |  Highest category: ${s.top_category}` : 'No expenses yet.';
+  const max = Math.max(...Object.values(s.by_category), 1);
+  document.getElementById('bars').innerHTML = Object.entries(s.by_category).map(([name, val]) =>
+    `<div class="bar-row"><span class="bar-label">${esc(name)}</span>
+     <div class="bar" style="width:${(val / max) * 300}px"></div>
+     <span class="bar-value">Rs ${val}</span></div>`).join('');
+}
+
+document.getElementById('form').onsubmit = async (ev) => {
+  ev.preventDefault();
+  const body = {
+    title: document.getElementById('title').value,
+    amount: document.getElementById('amount').value,
+    category: document.getElementById('category').value,
+    date: document.getElementById('date').value,
+  };
+  const res = await fetch('/api/expenses', {method: 'POST',
+    headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  const data = await res.json();
+  document.getElementById('error').textContent = res.ok ? '' : data.error;
+  if (res.ok) { document.getElementById('form').reset(); document.getElementById('date').valueAsDate = new Date(); load(); }
+};
+
+async function removeExpense(id) {
+  await fetch('/api/expenses/' + id, {method: 'DELETE'});
+  load();
+}
+load();
+</script>
+</body>
+</html>
