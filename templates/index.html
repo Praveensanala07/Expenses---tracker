@@ -1,96 +1,1658 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Expense Tracker</title>
-<style>
-  body{font-family:Arial,sans-serif;max-width:720px;margin:30px auto;padding:0 16px;color:#222}
-  h1{color:#1f3864}
-  form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  input,select,button{padding:9px;font-size:14px;box-sizing:border-box}
-  button{background:#1f3864;color:#fff;border:0;border-radius:4px;cursor:pointer;grid-column:span 2}
-  .del{background:#c0392b;grid-column:auto;padding:4px 10px}
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
-  td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}
-  .bar-row{display:flex;align-items:center;margin:5px 0;font-size:14px}
-  .bar-label{width:110px}
-  .bar{background:#1f3864;height:16px;border-radius:3px}
-  .bar-value{margin-left:8px}
-  #error{color:#c0392b;margin-top:6px}
-  @media(max-width:500px){form{grid-template-columns:1fr}button{grid-column:auto}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExpenseFlow Pro — Modern Expense Tracker & Financial Analytics</title>
+  <meta name="description" content="Production-ready expense tracker and financial analytics dashboard. Track daily spending, inspect category distributions, monitor monthly trends, and export CSV reports.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS Design System & Variables (Dark & Light Theme)
+       ========================================================================== */
+    :root {
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      /* Dark Theme (Default) */
+      --bg-base: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1e293b;
+      --bg-surface-glass: rgba(17, 24, 39, 0.75);
+      --bg-card: rgba(30, 41, 59, 0.6);
+      --bg-card-hover: rgba(51, 65, 85, 0.6);
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #6366f1;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-primary: #6366f1;
+      --accent-primary-hover: #4f46e5;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
+      --accent-sky: #0ea5e9;
+      --accent-violet: #8b5cf6;
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 25px -5px rgba(99, 102, 241, 0.35);
+      
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-surface-glass: rgba(255, 255, 255, 0.85);
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-card-hover: #f8fafc;
+      
+      --border-subtle: #e2e8f0;
+      --border-focus: #6366f1;
+      
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 25px -5px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      padding-bottom: 60px;
+    }
+
+    /* Container Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      transition: var(--transition);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-gradient);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-pro {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: rgba(99, 102, 241, 0.18);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+
+    /* Currency Select & Buttons */
+    .currency-select {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .currency-select:hover, .currency-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-icon:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+      background: var(--bg-card-hover);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--text-muted);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--accent-rose);
+      color: #ffffff;
+    }
+
+    /* Main Dashboard Header */
+    .hero-section {
+      margin-top: 32px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    h1.hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    /* KPI Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: var(--shadow-md);
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metric-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .metric-footer {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Analytics Section Grid */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Category Distribution List */
+    .cat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cat-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .cat-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .cat-bar-bg {
+      height: 8px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Monthly Chart */
+    .monthly-chart-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      height: 200px;
+      padding-top: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .month-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .month-bar {
+      width: 100%;
+      max-width: 44px;
+      background: var(--accent-gradient);
+      border-radius: 6px 6px 0 0;
+      transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .month-bar:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 105%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      border: 1px solid var(--border-subtle);
+      z-index: 10;
+      box-shadow: var(--shadow-md);
+    }
+
+    .month-label {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* Main Table & Controls Section */
+    .section-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .controls-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .search-wrap {
+      position: relative;
+      min-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-select {
+      padding: 9px 14px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .filter-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* Transactions Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    th:first-child { border-top-left-radius: var(--radius-md); }
+    th:last-child { border-top-right-radius: var(--radius-md); }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.875rem;
+      vertical-align: middle;
+      transition: var(--transition);
+    }
+
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .expense-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .expense-notes {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .amount-cell {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .category-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .btn-action {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-action:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-action.btn-del:hover {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+    }
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      color: var(--text-muted);
+    }
+
+    .empty-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      max-width: 380px;
+      margin: 0 auto 18px;
+    }
+
+    /* Modal Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      max-width: 500px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .modal-error {
+      color: var(--accent-rose);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      font-weight: 500;
+      display: none;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 88px;
+      right: 24px;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 280px;
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      pointer-events: auto;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-success { border-left: 4px solid var(--accent-emerald); }
+    .toast-error { border-left: 4px solid var(--accent-rose); }
+    .toast-info { border-left: 4px solid var(--accent-sky); }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls-left {
+        width: 100%;
+      }
+      .search-wrap {
+        width: 100%;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Expense Tracker</h1>
 
-<form id="form">
-  <input id="title" placeholder="What did you spend on?" required>
-  <input id="amount" type="number" step="0.01" placeholder="Amount (Rs)" required>
-  <select id="category">
-    <option>Food</option><option>Travel</option><option>Shopping</option>
-    <option>Bills</option><option>Study</option><option>Other</option>
-  </select>
-  <input id="date" type="date" required>
-  <button type="submit">Add expense</button>
-</form>
-<div id="error"></div>
+  <!-- Top Sticky Navigation -->
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand" id="brand-logo">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          ExpenseFlow
+          <span class="badge-pro">PRO v1.0</span>
+        </div>
+      </a>
 
-<h2>Summary</h2>
-<p id="total"></p>
-<div id="bars"></div>
+      <div class="nav-actions">
+        <div class="status-pill" id="health-pill" title="Backend Status: Healthy">
+          <div class="pulse-dot"></div>
+          <span id="health-status-text">Live System</span>
+        </div>
 
-<h2>All expenses</h2>
-<table>
-  <thead><tr><th>Date</th><th>Title</th><th>Category</th><th>Amount</th><th></th></tr></thead>
-  <tbody id="list"></tbody>
-</table>
+        <!-- Currency Selector -->
+        <select class="currency-select" id="currency-select" title="Change Currency Format">
+          <option value="INR" selected>₹ INR</option>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+        </select>
 
-<script>
-// Small helper so text from users cannot inject HTML
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        <!-- CSV Export Button -->
+        <a href="/api/expenses/export" class="btn btn-secondary" id="btn-export" title="Export all expenses to CSV spreadsheet">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export CSV
+        </a>
 
-document.getElementById('date').valueAsDate = new Date();
+        <!-- Dark / Light Theme Toggle -->
+        <button class="btn-icon" id="theme-toggle" title="Toggle Dark/Light Mode">
+          <svg id="theme-moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg id="theme-sun-icon" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
-async function load() {
-  // 1. Ask the API for all expenses and show them in the table
-  const expenses = await (await fetch('/api/expenses')).json();
-  document.getElementById('list').innerHTML = expenses.map(e =>
-    `<tr><td>${esc(e.date)}</td><td>${esc(e.title)}</td><td>${esc(e.category)}</td>
-     <td>Rs ${e.amount.toFixed(2)}</td>
-     <td><button class="del" onclick="removeExpense(${e.id})">Delete</button></td></tr>`).join('');
+  <!-- Main Content Container -->
+  <main class="container">
 
-  // 2. Ask the API for the Pandas summary and draw simple bars
-  const s = await (await fetch('/api/summary')).json();
-  document.getElementById('total').textContent = s.top_category
-    ? `Total spent: Rs ${s.total}  |  Highest category: ${s.top_category}` : 'No expenses yet.';
-  const max = Math.max(...Object.values(s.by_category), 1);
-  document.getElementById('bars').innerHTML = Object.entries(s.by_category).map(([name, val]) =>
-    `<div class="bar-row"><span class="bar-label">${esc(name)}</span>
-     <div class="bar" style="width:${(val / max) * 300}px"></div>
-     <span class="bar-value">Rs ${val}</span></div>`).join('');
-}
+    <!-- Hero Title & Quick Action -->
+    <div class="hero-section">
+      <div>
+        <h1 class="hero-title">Financial Overview & Expenses</h1>
+        <p class="hero-subtitle">Real-time expenditure tracking, automated analytics, and budget monitoring.</p>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="btn-open-add" onclick="openExpenseModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Record Expense
+        </button>
+      </div>
+    </div>
 
-document.getElementById('form').onsubmit = async (ev) => {
-  ev.preventDefault();
-  const body = {
-    title: document.getElementById('title').value,
-    amount: document.getElementById('amount').value,
-    category: document.getElementById('category').value,
-    date: document.getElementById('date').value,
-  };
-  const res = await fetch('/api/expenses', {method: 'POST',
-    headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
-  const data = await res.json();
-  document.getElementById('error').textContent = res.ok ? '' : data.error;
-  if (res.ok) { document.getElementById('form').reset(); document.getElementById('date').valueAsDate = new Date(); load(); }
-};
+    <!-- 4 KPI Metrics Cards -->
+    <section class="metrics-grid" aria-label="Key Performance Metrics">
+      <!-- Total Spent -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Total Outflow</span>
+          <div class="metric-icon-wrap" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value" id="kpi-total">₹0.00</div>
+        <div class="metric-footer">
+          <span class="badge-pill" style="background: rgba(99,102,241,0.15); color: #818cf8;" id="kpi-count-badge">0 items</span>
+          <span>across all recorded entries</span>
+        </div>
+      </div>
 
-async function removeExpense(id) {
-  await fetch('/api/expenses/' + id, {method: 'DELETE'});
-  load();
-}
-load();
-</script>
+      <!-- Top Spending Category -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Primary Spend Category</span>
+          <div class="metric-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value" id="kpi-top-category">—</div>
+        <div class="metric-footer">
+          <span class="badge-pill" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;" id="kpi-top-cat-amount">₹0.00</span>
+          <span>highest single category</span>
+        </div>
+      </div>
+
+      <!-- Average Expense -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Average / Transaction</span>
+          <div class="metric-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value" id="kpi-average">₹0.00</div>
+        <div class="metric-footer">
+          <span>computed dynamically via Pandas</span>
+        </div>
+      </div>
+
+      <!-- Highest Single Transaction -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Peak Transaction</span>
+          <div class="metric-icon-wrap" style="background: rgba(244, 63, 94, 0.15); color: #fb7185;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value" id="kpi-highest">₹0.00</div>
+        <div class="metric-footer">
+          <span id="kpi-highest-title">None recorded</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Analytics Grid: Category Bars & Monthly Chart -->
+    <section class="analytics-grid" aria-label="Spending Analytics">
+      <!-- Category Breakdown -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Spending by Category</h2>
+            <div class="panel-subtitle">Distribution across defined spending classifications</div>
+          </div>
+        </div>
+        <div class="cat-list" id="category-bars">
+          <!-- Dynamic category bars generated by JS -->
+          <div class="empty-desc" style="margin:20px 0;">No category data available yet.</div>
+        </div>
+      </div>
+
+      <!-- Monthly Trend -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Monthly Trajectory</h2>
+            <div class="panel-subtitle">Chronological expenditure totals</div>
+          </div>
+        </div>
+        <div class="monthly-chart-wrap" id="monthly-chart">
+          <!-- Dynamic monthly bars generated by JS -->
+          <div class="empty-desc" style="margin:auto;">No monthly data recorded yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- All Transactions Table & Filter Section -->
+    <section class="section-card" aria-label="Transaction Management">
+      <div class="controls-bar">
+        <div class="controls-left">
+          <!-- Realtime Search -->
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="filter-search" class="search-input" placeholder="Search by title or notes...">
+          </div>
+
+          <!-- Category Filter -->
+          <select id="filter-category" class="filter-select">
+            <option value="all">All Categories</option>
+            <option value="Food">🍔 Food</option>
+            <option value="Travel">✈️ Travel</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="Bills">💡 Bills</option>
+            <option value="Study">📚 Study</option>
+            <option value="Health">🏥 Health</option>
+            <option value="Entertainment">🎬 Entertainment</option>
+            <option value="Work">💼 Work</option>
+            <option value="Other">🎯 Other</option>
+          </select>
+
+          <!-- Sorting Selector -->
+          <select id="filter-sort" class="filter-select">
+            <option value="date_desc">Date: Newest First</option>
+            <option value="date_asc">Date: Oldest First</option>
+            <option value="amount_desc">Amount: Highest First</option>
+            <option value="amount_asc">Amount: Lowest First</option>
+            <option value="title_asc">Title: A to Z</option>
+          </select>
+        </div>
+
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="table-container">
+        <table id="transactions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Expense Details</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expense-list-body">
+            <!-- Dynamic expense rows -->
+          </tbody>
+        </table>
+        
+        <div id="table-empty" class="empty-state" style="display: none;">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <div class="empty-title">No transactions found</div>
+          <div class="empty-desc">No expense entries match your current search and filter criteria. Try adjusting your filters or record a new transaction.</div>
+          <button class="btn btn-primary" onclick="openExpenseModal()">+ Add New Expense</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / Edit Expense Modal Dialog -->
+  <div class="modal-backdrop" id="expense-modal">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Record New Expense</h3>
+        <button class="btn-action" onclick="closeExpenseModal()" title="Close dialog">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="expense-form" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="form-expense-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="form-title">Expense Title / Item</label>
+          <input type="text" id="form-title" class="form-control" placeholder="e.g., Grocery shopping, Flight ticket" required maxlength="100">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="form-amount">Amount</label>
+            <input type="number" id="form-amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-category">Category</label>
+            <select id="form-category" class="form-control" required>
+              <option value="Food">🍔 Food</option>
+              <option value="Travel">✈️ Travel</option>
+              <option value="Shopping">🛍️ Shopping</option>
+              <option value="Bills">💡 Bills</option>
+              <option value="Study">📚 Study</option>
+              <option value="Health">🏥 Health</option>
+              <option value="Entertainment">🎬 Entertainment</option>
+              <option value="Work">💼 Work</option>
+              <option value="Other">🎯 Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-date">Transaction Date</label>
+          <input type="date" id="form-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-notes">Optional Notes / Tag</label>
+          <input type="text" id="form-notes" class="form-control" placeholder="e.g., Paid via Credit Card, shared with friends" maxlength="500">
+        </div>
+
+        <div class="modal-error" id="form-error"></div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-expense">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script>
+    // State management
+    const state = {
+      expenses: [],
+      summary: {},
+      currency: localStorage.getItem('expense_currency') || 'INR',
+      theme: localStorage.getItem('expense_theme') || 'dark',
+      categoryColors: {
+        'Food': '#f97316',
+        'Travel': '#0ea5e9',
+        'Shopping': '#ec4899',
+        'Bills': '#eab308',
+        'Study': '#8b5cf6',
+        'Health': '#10b981',
+        'Entertainment': '#d946ef',
+        'Work': '#3b82f6',
+        'Other': '#64748b'
+      },
+      categoryIcons: {
+        'Food': '🍔',
+        'Travel': '✈️',
+        'Shopping': '🛍️',
+        'Bills': '💡',
+        'Study': '📚',
+        'Health': '🏥',
+        'Entertainment': '🎬',
+        'Work': '💼',
+        'Other': '🎯'
+      }
+    };
+
+    // Currency symbols and formatters
+    const currencyConfig = {
+      INR: { symbol: '₹', locale: 'en-IN' },
+      USD: { symbol: '$', locale: 'en-US' },
+      EUR: { symbol: '€', locale: 'de-DE' },
+      GBP: { symbol: '£', locale: 'en-GB' },
+      JPY: { symbol: '¥', locale: 'ja-JP' }
+    };
+
+    function formatMoney(amount) {
+      const cfg = currencyConfig[state.currency] || currencyConfig.INR;
+      return `${cfg.symbol}${Number(amount || 0).toLocaleString(cfg.locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+    }
+
+    // HTML escape helper to prevent XSS
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    // Toast Notification Dispatcher
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      } else if (type === 'error') {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+      } else {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+      }
+
+      toast.innerHTML = `${iconSvg}<span>${esc(message)}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 350);
+      }, 3500);
+    }
+
+    // Theme setup
+    function applyTheme(theme) {
+      state.theme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('expense_theme', theme);
+      document.getElementById('theme-moon-icon').style.display = theme === 'dark' ? 'block' : 'none';
+      document.getElementById('theme-sun-icon').style.display = theme === 'light' ? 'block' : 'none';
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    });
+
+    // Currency selection change
+    document.getElementById('currency-select').value = state.currency;
+    document.getElementById('currency-select').addEventListener('change', (e) => {
+      state.currency = e.target.value;
+      localStorage.setItem('expense_currency', state.currency);
+      renderUI();
+      showToast(`Currency changed to ${state.currency}`, 'info');
+    });
+
+    // Reset date input to today
+    function resetFormDate() {
+      document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+    }
+
+    // Modal Handlers
+    function openExpenseModal(editItem = null) {
+      const modal = document.getElementById('expense-modal');
+      const errBox = document.getElementById('form-error');
+      errBox.style.display = 'none';
+
+      if (editItem) {
+        document.getElementById('modal-title').textContent = 'Edit Expense Transaction';
+        document.getElementById('form-expense-id').value = editItem.id;
+        document.getElementById('form-title').value = editItem.title;
+        document.getElementById('form-amount').value = editItem.amount;
+        document.getElementById('form-category').value = editItem.category;
+        document.getElementById('form-date').value = editItem.date;
+        document.getElementById('form-notes').value = editItem.notes || '';
+        document.getElementById('btn-submit-expense').textContent = 'Update Expense';
+      } else {
+        document.getElementById('modal-title').textContent = 'Record New Expense';
+        document.getElementById('form-expense-id').value = '';
+        document.getElementById('expense-form').reset();
+        resetFormDate();
+        document.getElementById('btn-submit-expense').textContent = 'Save Transaction';
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeExpenseModal() {
+      document.getElementById('expense-modal').classList.remove('active');
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('expense-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('expense-modal')) {
+        closeExpenseModal();
+      }
+    });
+
+    // Keyboard ESC to close modal
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeExpenseModal();
+    });
+
+    // Fetch and render data
+    async function fetchExpenses() {
+      const search = document.getElementById('filter-search').value.trim();
+      const category = document.getElementById('filter-category').value;
+      const sortVal = document.getElementById('filter-sort').value;
+      
+      const [sortBy, order] = sortVal.split('_');
+
+      const params = new URLSearchParams({
+        search,
+        category,
+        sort_by: sortBy,
+        order
+      });
+
+      try {
+        const [expensesRes, summaryRes] = await Promise.all([
+          fetch(`/api/expenses?${params.toString()}`),
+          fetch('/api/summary')
+        ]);
+
+        if (expensesRes.ok) state.expenses = await expensesRes.json();
+        if (summaryRes.ok) state.summary = await summaryRes.json();
+
+        renderUI();
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        showToast('Unable to connect to server API', 'error');
+      }
+    }
+
+    // Health check ping
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          document.getElementById('health-status-text').textContent = 'Live System';
+          document.getElementById('health-pill').style.color = 'var(--accent-emerald)';
+        }
+      } catch (err) {
+        document.getElementById('health-status-text').textContent = 'Offline';
+        document.getElementById('health-pill').style.color = 'var(--accent-rose)';
+      }
+    }
+
+    // Main UI Render Pipeline
+    function renderUI() {
+      renderKPIs();
+      renderCategoryBars();
+      renderMonthlyChart();
+      renderTransactionsTable();
+    }
+
+    // 1. KPIs
+    function renderKPIs() {
+      const s = state.summary;
+      document.getElementById('kpi-total').textContent = formatMoney(s.total || 0);
+      document.getElementById('kpi-count-badge').textContent = `${s.count || 0} entries`;
+      document.getElementById('kpi-average').textContent = formatMoney(s.average || 0);
+
+      if (s.top_category && s.by_category && s.by_category[s.top_category]) {
+        const topAmount = s.by_category[s.top_category];
+        const icon = state.categoryIcons[s.top_category] || '🏷️';
+        document.getElementById('kpi-top-category').textContent = `${icon} ${s.top_category}`;
+        document.getElementById('kpi-top-cat-amount').textContent = formatMoney(topAmount);
+      } else {
+        document.getElementById('kpi-top-category').textContent = '—';
+        document.getElementById('kpi-top-cat-amount').textContent = formatMoney(0);
+      }
+
+      if (s.highest_expense) {
+        document.getElementById('kpi-highest').textContent = formatMoney(s.highest_expense.amount);
+        document.getElementById('kpi-highest-title').textContent = `${s.highest_expense.title} (${s.highest_expense.category})`;
+      } else {
+        document.getElementById('kpi-highest').textContent = formatMoney(0);
+        document.getElementById('kpi-highest-title').textContent = 'None recorded';
+      }
+    }
+
+    // 2. Category Bars
+    function renderCategoryBars() {
+      const container = document.getElementById('category-bars');
+      const byCat = state.summary.by_category || {};
+      const byCount = state.summary.by_category_count || {};
+      const total = state.summary.total || 1;
+
+      const entries = Object.entries(byCat);
+      if (entries.length === 0) {
+        container.innerHTML = '<div class="empty-desc" style="margin:20px 0;">No spending records available yet.</div>';
+        return;
+      }
+
+      container.innerHTML = entries.map(([cat, amount]) => {
+        const pct = Math.min(Math.round((amount / total) * 100), 100);
+        const color = state.categoryColors[cat] || '#6366f1';
+        const icon = state.categoryIcons[cat] || '🏷️';
+        const count = byCount[cat] || 0;
+
+        return `
+          <div class="cat-item">
+            <div class="cat-meta">
+              <div class="cat-info">
+                <span>${icon}</span>
+                <span>${esc(cat)}</span>
+                <span style="color:var(--text-muted); font-size:0.75rem; font-weight:400;">(${count} txns)</span>
+              </div>
+              <div style="font-family:var(--font-mono); font-weight:600;">
+                ${formatMoney(amount)} <span style="color:var(--text-muted); font-size:0.75rem;">(${pct}%)</span>
+              </div>
+            </div>
+            <div class="cat-bar-bg">
+              <div class="cat-bar-fill" style="width: ${pct}%; background-color: ${color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 3. Monthly Chart
+    function renderMonthlyChart() {
+      const container = document.getElementById('monthly-chart');
+      const byMonth = state.summary.by_month || {};
+      const entries = Object.entries(byMonth);
+
+      if (entries.length === 0) {
+        container.innerHTML = '<div class="empty-desc" style="margin:auto;">No monthly activity recorded.</div>';
+        return;
+      }
+
+      const maxVal = Math.max(...Object.values(byMonth), 1);
+
+      container.innerHTML = entries.map(([monthStr, amount]) => {
+        const heightPct = Math.max((amount / maxVal) * 100, 8);
+        const formattedAmount = formatMoney(amount);
+
+        return `
+          <div class="month-col">
+            <div class="month-bar" 
+                 style="height: ${heightPct}%;" 
+                 data-tooltip="${monthStr}: ${formattedAmount}">
+            </div>
+            <span class="month-label">${esc(monthStr)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 4. Transactions Table
+    function renderTransactionsTable() {
+      const tbody = document.getElementById('expense-list-body');
+      const emptyBox = document.getElementById('table-empty');
+      const table = document.getElementById('transactions-table');
+
+      if (!state.expenses || state.expenses.length === 0) {
+        tbody.innerHTML = '';
+        table.style.display = 'none';
+        emptyBox.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      emptyBox.style.display = 'none';
+
+      tbody.innerHTML = state.expenses.map(e => {
+        const icon = state.categoryIcons[e.category] || '🏷️';
+        const color = state.categoryColors[e.category] || '#6366f1';
+
+        return `
+          <tr>
+            <td style="white-space: nowrap; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.825rem;">
+              ${esc(e.date)}
+            </td>
+            <td>
+              <div class="expense-title">${esc(e.title)}</div>
+              ${e.notes ? `<div class="expense-notes">${esc(e.notes)}</div>` : ''}
+            </td>
+            <td>
+              <span class="category-chip" style="background: ${color}20; color: ${color}; border-color: ${color}40;">
+                <span>${icon}</span>
+                <span>${esc(e.category)}</span>
+              </span>
+            </td>
+            <td class="amount-cell">
+              ${formatMoney(e.amount)}
+            </td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action" onclick='handleEditClick(${JSON.stringify(e)})' title="Edit transaction">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="btn-action btn-del" onclick="handleDeleteClick(${e.id})" title="Delete transaction">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleEditClick(item) {
+      openExpenseModal(item);
+    }
+
+    async function handleDeleteClick(id) {
+      if (!confirm('Are you sure you want to delete this expense transaction?')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          showToast('Expense transaction removed', 'info');
+          fetchExpenses();
+        } else {
+          const data = await res.json();
+          showToast(data.error || 'Failed to delete expense', 'error');
+        }
+      } catch (err) {
+        showToast('Error communicating with server', 'error');
+      }
+    }
+
+    // Form Submit (Add or Update)
+    async function handleFormSubmit(ev) {
+      ev.preventDefault();
+      const errBox = document.getElementById('form-error');
+      errBox.style.display = 'none';
+
+      const expenseId = document.getElementById('form-expense-id').value;
+      const isEdit = Boolean(expenseId);
+
+      const payload = {
+        title: document.getElementById('form-title').value.trim(),
+        amount: parseFloat(document.getElementById('form-amount').value),
+        category: document.getElementById('form-category').value,
+        date: document.getElementById('form-date').value,
+        notes: document.getElementById('form-notes').value.trim()
+      };
+
+      const url = isEdit ? `/api/expenses/${expenseId}` : '/api/expenses';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errBox.textContent = data.error || 'Validation failed';
+          errBox.style.display = 'block';
+          return;
+        }
+
+        closeExpenseModal();
+        showToast(isEdit ? 'Expense updated successfully' : 'Expense recorded successfully', 'success');
+        fetchExpenses();
+      } catch (err) {
+        errBox.textContent = 'Server connection error. Please try again.';
+        errBox.style.display = 'block';
+      }
+    }
+
+    // Debounced Search and Filters
+    let debounceTimer;
+    document.getElementById('filter-search').addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetchExpenses, 250);
+    });
+
+    document.getElementById('filter-category').addEventListener('change', fetchExpenses);
+    document.getElementById('filter-sort').addEventListener('change', fetchExpenses);
+
+    function resetFilters() {
+      document.getElementById('filter-search').value = '';
+      document.getElementById('filter-category').value = 'all';
+      document.getElementById('filter-sort').value = 'date_desc';
+      fetchExpenses();
+      showToast('Filters reset', 'info');
+    }
+
+    // Initial Load
+    applyTheme(state.theme);
+    resetFormDate();
+    fetchExpenses();
+    checkHealth();
+    // Periodic health check
+    setInterval(checkHealth, 30000);
+  </script>
 </body>
 </html>

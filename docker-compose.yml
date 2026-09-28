@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    container_name: expenseflow_web
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=production-secure-compose-secret-key
+      - DATABASE_PATH=/app/data/expenses.db
+    volumes:
+      - expense_data:/app/data
+
+volumes:
+  expense_data:
+    driver: local
